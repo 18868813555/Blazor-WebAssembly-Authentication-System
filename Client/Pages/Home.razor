@@ -1,0 +1,77 @@
+﻿@page "/"
+@inject NavigationManager Nav
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Welcome</h1>
+            <p>Please login</p>
+        </div>
+        
+        <div class="auth-buttons">
+            <button class="btn btn-primary btn-lg" @onclick="@(() => Nav.NavigateTo("/login"))">
+                <i class="fas fa-sign-in-alt"></i> <span>Login</span>
+            </button>
+            <button class="btn btn-outline-primary btn-lg" @onclick="@(() => Nav.NavigateTo("/register"))">
+                <i class="fas fa-user-plus"></i> <span>Register</span>
+            </button>
+            <button class="btn btn-outline-primary btn-lg" @onclick="@(() => Nav.NavigateTo("/welcome"))">
+                <i class="fas fa-user-plus"></i> <span>Welcome</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+    }
+    
+    .auth-card {
+        background: white;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+    }
+    
+    .auth-header h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    
+    .auth-header p {
+        color: #666;
+        margin-bottom: 30px;
+    }
+    
+    .auth-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .btn i {
+        margin-right: 8px;
+    }
+</style>

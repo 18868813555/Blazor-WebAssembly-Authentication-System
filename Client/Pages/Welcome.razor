@@ -1,0 +1,194 @@
+@page "/welcome"
+@using Client.Services
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<div class="welcome-container">
+    <div class="welcome-card">
+        <div class="welcome-header">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h1>Welcome back!</h1>
+            <p>You have successfully logged in to the system</p>
+        </div>
+        
+        <div class="welcome-content">
+            <div class="info-card">
+                <h3><i class="fas fa-info-circle"></i> Account Information</h3>
+                <p><strong>Email:</strong> @Email</p>
+                <p><strong>Login Status:</strong> <span class="status-success">Logged In</span></p>
+                <p><strong>Login Time:</strong> @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</p>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" @onclick="GoToHome">
+                    <i class="fas fa-home"></i> Back to Home
+                </button>
+                <button class="btn btn-outline-danger" @onclick="Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string Email = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+        if (string.IsNullOrEmpty(token))
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+        
+        if (JwtService.IsTokenExpired(token))
+        {
+            await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
+            Nav.NavigateTo("/login");
+            return;
+        }
+        
+        Email = JwtService.GetEmailFromToken(token) ?? "";
+    }
+
+    private void GoToHome()
+    {
+        Nav.NavigateTo("/");
+    }
+
+    private async Task Logout()
+    {
+        await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
+        Nav.NavigateTo("/");
+    }
+}
+
+<style>
+    .welcome-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+    }
+    
+    .welcome-card {
+        background: white;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .welcome-header {
+        margin-bottom: 30px;
+    }
+    
+    .user-avatar {
+        font-size: 80px;
+        color: #667eea;
+        margin-bottom: 20px;
+    }
+    
+    .welcome-header h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    
+    .welcome-header p {
+        color: #666;
+        margin: 0;
+        font-size: 18px;
+    }
+    
+    .welcome-content {
+        text-align: left;
+    }
+    
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .info-card h3 {
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .info-card p {
+        margin-bottom: 8px;
+        color: #555;
+    }
+    
+    .status-success {
+        color: #28a745;
+        font-weight: 500;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-outline-danger {
+        background: transparent;
+        color: #dc3545;
+        border: 2px solid #dc3545;
+    }
+    
+    .btn-outline-danger:hover {
+        background: #dc3545;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    }
+    
+    @@media (max-width: 480px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .welcome-card {
+            padding: 30px 20px;
+        }
+    }
+</style>

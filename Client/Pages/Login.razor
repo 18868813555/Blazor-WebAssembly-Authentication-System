@@ -1,0 +1,280 @@
+@page "/login"
+@using System.Text.Json
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Login</h2>
+            <p>Please enter your login information</p>
+        </div>
+        
+        <form @onsubmit="LoginUser" class="auth-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input 
+                        id="email"
+                        type="email" 
+                        @bind="Email" 
+                        @bind:event="oninput"
+                        placeholder="Enter your email"
+                        class="form-control"
+                        required />
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input 
+                        id="password"
+                        type="password" 
+                        @bind="Password" 
+                        @bind:event="oninput"
+                        placeholder="Enter your password"
+                        class="form-control"
+                        required />
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> @Message
+                </div>
+            }
+            
+            <button type="submit" class="btn btn-primary btn-block" disabled="@IsLoading">
+                @if (IsLoading)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    <span>Logging in...</span>
+                }
+                else
+                {
+                    <i class="fas fa-sign-in-alt"></i> <span>Login</span>
+                }
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="/register" class="link-primary">Register now</a></p>
+            <a href="/" class="link-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    string Email = "";
+    string Password = "";
+    string Message = "";
+    bool IsLoading = false;
+
+    async Task LoginUser()
+    {
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            Message = "Please fill in all login information";
+            return;
+        }
+
+        IsLoading = true;
+        Message = "";
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/login", new {
+                email = Email,
+                password = Password
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+                var token = result.GetProperty("token").GetString();
+
+                // Save only token to localStorage (email is inside the token)
+                await JS.InvokeVoidAsync("localStorage.setItem", "authToken", token);
+                Nav.NavigateTo("/welcome");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Message = errorContent.Contains("Invalid credentials") ? "Email or password is incorrect" : errorContent;
+            }
+        }
+        catch (Exception)
+        {
+            Message = "Login failed, please check your network connection";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}
+
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+    }
+    
+    .auth-card {
+        background: white;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        max-width: 400px;
+        width: 100%;
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .auth-header h2 {
+        color: #333;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+    
+    .auth-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .auth-form {
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        z-index: 2;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    
+    .alert {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .auth-footer {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid #e1e5e9;
+    }
+    
+    .auth-footer p {
+        margin-bottom: 10px;
+        color: #666;
+    }
+    
+    .link-primary {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .link-primary:hover {
+        text-decoration: underline;
+    }
+    
+    .link-secondary {
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .link-secondary:hover {
+        color: #333;
+    }
+</style>
