@@ -254,7 +254,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 2. **JWT Tokens** - Signed tokens with expiration
 3. **HTTPS Enforcement** - Secure transport in production
 4. **Input Validation** - Client and server-side validation
-5. **CORS Configuration** - Controlled cross-origin access
 
 ### Security Best Practices Applied
 - Never store passwords in plain text
@@ -262,59 +261,3 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 - Implement proper token expiration
 - Validate all user inputs
 - Use parameterized queries (EF Core)
-
-## 🚀 Deployment
-
-### Production Deployment Steps
-
-1. **Configure Production Settings**
-   ```csharp
-   // appsettings.Production.json
-   {
-     "Logging": {
-       "LogLevel": {
-         "Default": "Warning"
-       }
-     }
-   }
-   ```
-
-2. **Build for Production**
-   ```bash
-   dotnet publish -c Release -o ./publish
-   ```
-
-3. **Deploy to Web Server**
-   - Copy published files to your web server
-   - Configure IIS/Nginx for static file serving
-   - Set up HTTPS certificates
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Microsoft** - For the excellent Blazor WebAssembly framework
-- **Entity Framework Core** - For simplified database operations
-- **BCrypt.Net** - For secure password hashing
-- **Font Awesome** - For beautiful icons
-
-## 📞 Support
-
-If you have any questions or run into issues, please:
-- Check the [Issues](https://github.com/yourusername/Blazor-WebAssembly-Authentication-System/issues) page
-- Create a new issue with detailed information
-- Contact the maintainers
-
----
-
-**Built with ❤️ using Blazor WebAssembly and ASP.NET Core**
